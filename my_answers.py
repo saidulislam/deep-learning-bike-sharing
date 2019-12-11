@@ -51,7 +51,6 @@ class NeuralNetwork(object):
             Arguments
             ---------
             X: features batch
-
         '''
         #### Implement the forward pass here ####
         ### Forward pass ###
@@ -74,7 +73,6 @@ class NeuralNetwork(object):
             y: target (i.e. label) batch
             delta_weights_i_h: change in weights from input to hidden layers
             delta_weights_h_o: change in weights from hidden to output layers
-
         '''
         #### Implement the backward pass here ####
         ### Backward pass ###
@@ -91,9 +89,11 @@ class NeuralNetwork(object):
         hidden_error_term = hidden_error * hidden_outputs * (1 - hidden_outputs)
         
         # Weight step (input to hidden)
-        delta_weights_i_h += None
+        delta_weights_i_h += hidden_error_term * X.reshape(-1,1)
+        
         # Weight step (hidden to output)
-        delta_weights_h_o += None
+        delta_weights_h_o += output_error_term * hidden_outputs.reshape(-1,1)
+        
         return delta_weights_i_h, delta_weights_h_o
 
     def update_weights(self, delta_weights_i_h, delta_weights_h_o, n_records):
@@ -104,10 +104,13 @@ class NeuralNetwork(object):
             delta_weights_i_h: change in weights from input to hidden layers
             delta_weights_h_o: change in weights from hidden to output layers
             n_records: number of records
-
         '''
-        self.weights_hidden_to_output += hidden_error_term * X[:,None] # update hidden-to-output weights with gradient descent step
-        self.weights_input_to_hidden += output_error_term * hidden_outputs[:,None] # update input-to-hidden weights with gradient descent step
+        
+        # update hidden-to-output weights with gradient descent step
+        self.weights_hidden_to_output += self.lr * delta_weights_h_o/n_records 
+        
+        # update input-to-hidden weights with gradient descent step
+        self.weights_input_to_hidden += self.lr * delta_weights_i_h/n_records 
 
     def run(self, features):
         ''' Run a forward pass through the network with input features 
@@ -132,7 +135,7 @@ class NeuralNetwork(object):
 #########################################################
 # Set your hyperparameters here
 ##########################################################
-iterations = 100
-learning_rate = 0.1
-hidden_nodes = 2
+iterations = 4000
+learning_rate = 0.4
+hidden_nodes = 10
 output_nodes = 1
